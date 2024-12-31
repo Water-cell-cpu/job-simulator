@@ -1,54 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Job Simulator</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Simulator</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="app">
-    <h1>Job Simulator</h1>
-    
-    <!-- Login Section -->
-    <div id="login-section">
-      <h2>Login</h2>
-      <input type="text" id="username" placeholder="Username">
-      <input type="password" id="password" placeholder="Password">
-      <button onclick="login()">Login</button>
+    <div id="auth-section">
+        <h1>Welcome to the Job Simulator!</h1>
+        <div id="login-form">
+            <h2>Login</h2>
+            <input type="text" id="login-username" placeholder="Username" required>
+            <input type="password" id="login-password" placeholder="Password" required>
+            <button onclick="login()">Login</button>
+        </div>
+        <div id="register-form">
+            <h2>Register</h2>
+            <input type="text" id="register-username" placeholder="Username" required>
+            <input type="password" id="register-password" placeholder="Password" required>
+            <button onclick="register()">Register</button>
+        </div>
     </div>
-    
-    <!-- Register Section -->
-    <div id="register-section">
-      <h2>Register</h2>
-      <input type="text" id="new-username" placeholder="New Username">
-      <input type="password" id="new-password" placeholder="New Password">
-      <button onclick="register()">Register</button>
-    </div>
-    
-    <!-- Admin Panel -->
-    <div id="admin-panel" style="display:none;">
-      <h2>Admin Panel</h2>
-      <div id="user-list"></div>
-      <div>
-        <h3>Manage User</h3>
-        <input type="text" id="manage-user" placeholder="Username">
-        <input type="number" id="amount" placeholder="Amount">
-        <button onclick="addMoney()">Add Money</button>
-        <button onclick="removeMoney()">Remove Money</button>
-      </div>
-      <button onclick="logout()">Logout</button>
-    </div>
-    
-    <!-- User Dashboard -->
-    <div id="user-dashboard" style="display:none;">
-      <h2>Welcome, <span id="user-name"></span></h2>
-      <p>Your balance: $<span id="balance"></span></p>
-      <button onclick="logout()">Logout</button>
-    </div>
-  </div>
 
-  <!-- Ensure JavaScript is loaded at the end -->
-  <script src="script.js"></script>
+    <div id="dashboard" style="display: none;">
+        <h1 id="welcome-message"></h1>
+        <div id="user-actions">
+            <p>Your balance: $<span id="balance"></span></p>
+        </div>
+        <div id="admin-controls" style="display: none;">
+            <h2>Admin Controls</h2>
+            <div id="user-list"></div>
+            <div id="admin-actions">
+                <h3>Modify User Balance</h3>
+                <input type="text" id="admin-username" placeholder="Username">
+                <input type="number" id="admin-amount" placeholder="Amount">
+                <button onclick="addMoney()">Add Money</button>
+                <button onclick="removeMoney()">Remove Money</button>
+            </div>
+        </div>
+        <button onclick="logout()">Logout</button>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
