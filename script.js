@@ -1,84 +1,94 @@
-// Script to manage users and their bank accounts
-let users = JSON.parse(localStorage.getItem('users')) || [];
+// Users and balances in localStorage
+let users = JSON.parse(localStorage.getItem("users")) || [];
 
-// Function to register a new user
-function register() {
-    const username = document.getElementById('register-username').value;
-    const password = document.getElementById('register-password').value;
-
-    if (users.some(user => user.username === username)) {
-        alert('Username already exists');
-        return;
-    }
-
-    users.push({ username, password, balance: 0 });
-    localStorage.setItem('users', JSON.stringify(users));
-    alert('User registered successfully');
-}
-
-// Function to log in a user
+// Login functionality
 function login() {
-    const username = document.getElementById('login-username').value;
-    const password = document.getElementById('login-password').value;
+    const username = document.getElementById("login-username").value;
+    const password = document.getElementById("login-password").value;
 
     const user = users.find(u => u.username === username && u.password === password);
-    if (!user) {
-        alert('Invalid username or password');
-        return;
+
+    if (user) {
+        localStorage.setItem("currentUser", JSON.stringify(user));
+        loadDashboard(user);
+    } else {
+        alert("Invalid username or password!");
     }
-
-    localStorage.setItem('loggedInUser', JSON.stringify(user));
-    window.location.href = username === 'Sp4tan' ? 'admin.html' : 'dashboard.html';
 }
 
-// Function to log out a user
-function logout() {
-    localStorage.removeItem('loggedInUser');
-    window.location.href = 'index.html';
-}
+// Register functionality
+function register() {
+    const username = document.getElementById("register-username").value;
+    const password = document.getElementById("register-password").value;
 
-// Function to add money to a user's account (admin only)
-function addMoney(username, amount) {
-    const user = users.find(u => u.username === username);
-    if (!user) {
-        alert('User not found');
-        return;
+    if (users.some(u => u.username === username)) {
+        alert("Username already exists!");
+    } else {
+        const newUser = { username, password, balance: 0 };
+        users.push(newUser);
+        localStorage.setItem("users", JSON.stringify(users));
+        alert("Registration successful! You can now log in.");
     }
-
-    user.balance += parseFloat(amount);
-    localStorage.setItem('users', JSON.stringify(users));
-    alert(`${amount} added to ${username}'s account`);
 }
 
-// Function to remove money from a user's account (admin only)
-function removeMoney(username, amount) {
-    const user = users.find(u => u.username === username);
-    if (!user) {
-        alert('User not found');
-        return;
+// Load the dashboard
+function loadDashboard(user) {
+    document.getElementById("auth-section").style.display = "none";
+    document.getElementById("dashboard").style.display = "block";
+
+    document.getElementById("welcome-message").textContent = `Welcome, ${user.username}!`;
+    document.getElementById("balance").textContent = user.balance;
+
+    if (user.username === "Sp4tan") {
+        showAdminControls();
     }
-
-    user.balance -= parseFloat(amount);
-    localStorage.setItem('users', JSON.stringify(users));
-    alert(`${amount} removed from ${username}'s account`);
 }
 
-// Function to load users for admin panel
-function loadUsers() {
-    const usersTable = document.getElementById('users-table');
-    usersTable.innerHTML = ''; // Clear previous entries
+// Show admin controls
+function showAdminControls() {
+    const adminControls = document.getElementById("admin-controls");
+    adminControls.style.display = "block";
 
-    users.forEach(user => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${user.username}</td>
-            <td>${user.password}</td>
-            <td>${user.balance}</td>
-            <td>
-                <button onclick="addMoney('${user.username}', prompt('Enter amount to add:'))">Add Money</button>
-                <button onclick="removeMoney('${user.username}', prompt('Enter amount to remove:'))">Remove Money</button>
-            </td>
-        `;
-        usersTable.appendChild(row);
+    const userList = document.getElementById("user-list");
+    userList.innerHTML = "<h3>All Users</h3>";
+
+    users.forEach(u => {
+        userList.innerHTML += `<p>${u.username} - Balance: $${u.balance}, Password: ${u.password}</p>`;
     });
+}
+
+// Add money as admin
+function addMoney() {
+    const username = document.getElementById("admin-username").value;
+    const amount = parseFloat(document.getElementById("admin-amount").value);
+
+    const user = users.find(u => u.username === username);
+    if (user) {
+        user.balance += amount;
+        localStorage.setItem("users", JSON.stringify(users));
+        alert(`Added $${amount} to ${username}'s balance.`);
+    } else {
+        alert("User not found.");
+    }
+}
+
+// Remove money as admin
+function removeMoney() {
+    const username = document.getElementById("admin-username").value;
+    const amount = parseFloat(document.getElementById("admin-amount").value);
+
+    const user = users.find(u => u.username === username);
+    if (user) {
+        user.balance -= amount;
+        localStorage.setItem("users", JSON.stringify(users));
+        alert(`Removed $${amount} from ${username}'s balance.`);
+    } else {
+        alert("User not found.");
+    }
+}
+
+// Logout functionality
+function logout() {
+    localStorage.removeItem("currentUser");
+    location.reload();
 }
