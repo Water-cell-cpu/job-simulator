@@ -1,102 +1,84 @@
-// Load users from localStorage or initialize with default admin
-const defaultAdmin = [{ username: "Sp4tan", password: "Elipson Eridani 2", balance: 0, isAdmin: true }];
-let users = JSON.parse(localStorage.getItem("users")) || defaultAdmin;
+// Script to manage users and their bank accounts
+let users = JSON.parse(localStorage.getItem('users')) || [];
 
-// Ensure users is always an array
-if (!Array.isArray(users)) {
-  users = defaultAdmin;
-  saveUsers();
-}
-
-// Save updated users list to localStorage
-function saveUsers() {
-  localStorage.setItem("users", JSON.stringify(users));
-}
-
-// Login function
-function login() {
-  const username = document.getElementById("username").value;
-  const password = document.getElementById("password").value;
-
-  // Ensure users is an array
-  if (!Array.isArray(users)) {
-    alert("User data is corrupted. Resetting to default.");
-    users = defaultAdmin;
-    saveUsers();
-    return;
-  }
-
-  const user = users.find(u => u.username === username && u.password === password);
-
-  if (user) {
-    if (user.isAdmin) {
-      showAdminPanel();
-    } else {
-      showUserDashboard(user);
-    }
-  } else {
-    alert("Invalid credentials!");
-  }
-}
-
-// Register function
+// Function to register a new user
 function register() {
-  const newUsername = document.getElementById("new-username").value;
-  const newPassword = document.getElementById("new-password").value;
+    const username = document.getElementById('register-username').value;
+    const password = document.getElementById('register-password').value;
 
-  if (!newUsername || !newPassword) {
-    alert("Please fill in all fields!");
-    return;
-  }
+    if (users.some(user => user.username === username)) {
+        alert('Username already exists');
+        return;
+    }
 
-  const existingUser = users.find(u => u.username === newUsername);
-  if (existingUser) {
-    alert("Username already exists!");
-    return;
-  }
-
-  users.push({ username: newUsername, password: newPassword, balance: 0, isAdmin: false });
-  saveUsers();
-  alert("Registration successful! You can now log in.");
-  document.getElementById("new-username").value = "";
-  document.getElementById("new-password").value = "";
+    users.push({ username, password, balance: 0 });
+    localStorage.setItem('users', JSON.stringify(users));
+    alert('User registered successfully');
 }
 
-// Display admin panel
-function showAdminPanel() {
-  document.getElementById("login-section").style.display = "none";
-  document.getElementById("register-section").style.display = "none";
-  document.getElementById("admin-panel").style.display = "block";
+// Function to log in a user
+function login() {
+    const username = document.getElementById('login-username').value;
+    const password = document.getElementById('login-password').value;
 
-  const userList = document.getElementById("user-list");
-  userList.innerHTML = "<h3>Users:</h3>";
-  users.forEach(user => {
-    userList.innerHTML += `<p>${user.username} (Password: ${user.password}, Balance: $${user.balance})</p>`;
-  });
+    const user = users.find(u => u.username === username && u.password === password);
+    if (!user) {
+        alert('Invalid username or password');
+        return;
+    }
+
+    localStorage.setItem('loggedInUser', JSON.stringify(user));
+    window.location.href = username === 'Sp4tan' ? 'admin.html' : 'dashboard.html';
 }
 
-// Display user dashboard
-function showUserDashboard(user) {
-  document.getElementById("login-section").style.display = "none";
-  document.getElementById("register-section").style.display = "none";
-  document.getElementById("user-dashboard").style.display = "block";
-  document.getElementById("user-name").textContent = user.username;
-  document.getElementById("balance").textContent = user.balance;
-}
-
-// Logout function
+// Function to log out a user
 function logout() {
-  document.getElementById("login-section").style.display = "block";
-  document.getElementById("register-section").style.display = "block";
-  document.getElementById("admin-panel").style.display = "none";
-  document.getElementById("user-dashboard").style.display = "none";
-
-  // Clear inputs
-  document.getElementById("username").value = "";
-  document.getElementById("password").value = "";
-  document.getElementById("new-username").value = "";
-  document.getElementById("new-password").value = "";
+    localStorage.removeItem('loggedInUser');
+    window.location.href = 'index.html';
 }
 
-// Save initial admin user if localStorage was empty
-saveUsers();
+// Function to add money to a user's account (admin only)
+function addMoney(username, amount) {
+    const user = users.find(u => u.username === username);
+    if (!user) {
+        alert('User not found');
+        return;
+    }
+
+    user.balance += parseFloat(amount);
+    localStorage.setItem('users', JSON.stringify(users));
+    alert(`${amount} added to ${username}'s account`);
+}
+
+// Function to remove money from a user's account (admin only)
+function removeMoney(username, amount) {
+    const user = users.find(u => u.username === username);
+    if (!user) {
+        alert('User not found');
+        return;
+    }
+
+    user.balance -= parseFloat(amount);
+    localStorage.setItem('users', JSON.stringify(users));
+    alert(`${amount} removed from ${username}'s account`);
+}
+
+// Function to load users for admin panel
+function loadUsers() {
+    const usersTable = document.getElementById('users-table');
+    usersTable.innerHTML = ''; // Clear previous entries
+
+    users.forEach(user => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${user.username}</td>
+            <td>${user.password}</td>
+            <td>${user.balance}</td>
+            <td>
+                <button onclick="addMoney('${user.username}', prompt('Enter amount to add:'))">Add Money</button>
+                <button onclick="removeMoney('${user.username}', prompt('Enter amount to remove:'))">Remove Money</button>
+            </td>
+        `;
+        usersTable.appendChild(row);
+    });
+}
